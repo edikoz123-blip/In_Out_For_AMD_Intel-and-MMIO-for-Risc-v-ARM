@@ -8,7 +8,7 @@
 ; ==============================================================================
 ; FILE: amd_chipset_io_def.inc
 ; AUTHOR: The Ghost In The Matrix
-; PURPOSE: Pure AMD Read-Only coordinates and I/O ports for hardware locks.
+; PURPOSE: Pure AMD Read-Only and WRITE/READ coordinates and I/O ports for hardware locks.
 ; PHILOSOPHY: AMD-Exclusive, Static Dictatorship, Pure I/O (NO MSRs).
 ; ==============================================================================
 
@@ -935,7 +935,7 @@
 
 
 ; --- SUBSYSTEM CODENAME: AMD ADVANCED POISON DETECTION MASTER ---
-; EXPLANATION: Read-only index offset used to passively check if the memory controller's
+; EXPLANATION: Read-only index offset used to passively check if the memory controllers
 ; hardware-level "Data Poisoning" mechanisms are active to isolate corrupted cache lines.
 ; ------------------------------------------------------------------------------
 %define AMD_REG_POISON_ISOLATION_STATUS 0x64       ; [READ-ONLY] Read-only capabilities indicator for global memory defense telemetry
@@ -999,7 +999,7 @@
 
 
 ; --- SUBSYSTEM CODENAME: AMD MEMORY CONTROLLER FREQUENCY GATE MASK ---
-; EXPLANATION: Read-only index offset used to passively check if the memory controller's 
+; EXPLANATION: Read-only index offset used to passively check if the memory controllers 
 ; internal clock gating and dynamic frequency scaling features are functionally locked.
 ; ------------------------------------------------------------------------------
 %define AMD_REG_MC_CLK_GATING_STATUS    0x70       ; [READ-ONLY] Read-only capabilities indicator for dynamic memory frequency scaling
@@ -1865,3 +1865,299 @@
 %define AMD_REG_DMA_FENCE_VALID_FLAG    0xFC       ; [READ-ONLY] Fused register displaying active hardware DMA boundary profiles
 
 
+
+;------------------------------> READ/WRITE CHIP AMD
+
+
+
+
+; ==============================================================================
+; 🔑 INTERACTION MATRIX: AMD ACTIVE CONTROL & READ-WRITE GATEWAYS
+; ------------------------------------------------------------------------------
+; EXPLANATION: Targets the explicit hardware domains where the SMM code forces
+; state transitions. Writing to these coordinates alters motherboard signaling,
+; re-routes configuration buses, or triggers physical hardware lock latches.
+; ==============================================================================
+
+
+; --- SUBSYSTEM CODENAME: AMD PCI CONFIGURATION MATRIX ADDRESS GAP ---
+; EXPLANATION: The universal x86 gateway used to target specific silicon elements.
+; ------------------------------------------------------------------------------
+%define AMD_PCI_ADDR_GATEWAY            0x0CF8     
+; [READ/WRITE] Injects the targeted 32-bit geometric bus coordinate (Bus/Dev/Func/Offset).
+; Must be written to first before execution data can be pumped through port 0x0CFC.
+
+
+; --- SUBSYSTEM CODENAME: AMD PCI CONFIGURATION MATRIX DATA GAP ---
+; EXPLANATION: The bidirectional execution window to extract or inject payload states.
+; ------------------------------------------------------------------------------
+%define AMD_PCI_DATA_GATEWAY            0x0CFC     
+; [READ/WRITE] The trigger mechanism. Pumping data here sends physical voltage flips 
+; directly to the transistors of the target offset previously prepared by port 0x0CF8.
+
+
+; --- SUBSYSTEM CODENAME: AMD FCH LPC INTERFACE BASE CONTROL ---
+; EXPLANATION: Base target configuration coordinate inside Bus 0, Device 31, Function 0.
+; Used as the master address payload to unlock firmware protection registers.
+; ------------------------------------------------------------------------------
+%define AMD_FCH_LPC_CONTROL_BASE        0x8000F800 
+; [READ/WRITE] Routes the motherboard configuration engine directly to the FCH Southbridge.
+
+
+; --- SUBSYSTEM CODENAME: AMD SPI ROM PROTECTION MASTER OFFSET ---
+; EXPLANATION: The exact configuration target handling hardware locks for the BIOS Flash.
+; ------------------------------------------------------------------------------
+%define AMD_LPC_REG_SPI_PROTECTION      0x000000DC 
+; [READ/WRITE] Combined with port 0x0CF8 to target the hardware firmware protection cage.
+
+
+; --- SUBSYSTEM CODENAME: HISTORICAL x86 HARDWARE RESET REGULATOR ---
+; EXPLANATION: Architectural I/O register used to control physical motherboard reboots.
+; --------------------------------==============================================
+%define LEGACY_RST_CONTROL_PORT         0x0CF9     
+; [READ/WRITE] Writing specific byte payloads here (e.g., 0x06 or 0x0E) forces the 
+; motherboard power management lines to cycle, triggering an instant hard system reset.
+
+
+; --- SUBSYSTEM CODENAME: AMD LOCAL SMU INDEX WINDOW GATE ---
+; EXPLANATION: Access port inside Device 18, Function 0 used to target private SMU spaces.
+; ------------------------------------------------------------------------------
+%define AMD_REG_SMU_INDEX_WRITE         0xB8       
+; [READ/WRITE] Injects the targeted private memory address into the internal SMU network.
+
+
+; --- SUBSYSTEM CODENAME: AMD LOCAL SMU DATA WINDOW GATE ---
+; EXPLANATION: Access port inside Device 18, Function 0 used to inject data payloads to SMU.
+; ------------------------------------------------------------------------------
+%define AMD_REG_SMU_DATA_WRITE          0xBC       
+; [READ/WRITE] Pumps the configuration data straight into the private SMU index register.
+
+; ==============================================================================
+; 🚀 EXTENDED INTERACTIONS: AMD MMIO CONFIGURATION SPACE (READ-WRITE MAP)
+; ------------------------------------------------------------------------------
+; EXPLANATION: Targets extended 4KB configuration windows mapped directly into 
+; physical RAM. Writing to these MMIO spaces bypasses legacy I/O ports and alters 
+; deep microarchitectural structures like PCIe Gen 5 link lane routing rules.
+; ==============================================================================
+
+%define AMD_MMIO_CONFIG_BASE            0xE0000000 
+; [READ/WRITE] Fused structural base address in physical RAM where the motherboard 
+; maps the entire PCI Express Extended Configuration Space matrix at boot.
+
+; --- SUBSYSTEM CODENAME: AMD PCIE GEN 5 EXTENDED REGISTER MATRIX ---
+%define AMD_EXT_REG_PCIE_LINK_CONTROL   0x00100088 
+; [READ/WRITE] Extended offset written to alter PCIe Gen 5 link speeds, power profiles, 
+; and horizontal clock training steps directly in the Root Port architecture.
+
+; ==============================================================================
+; 🚨 ACTIVE INT: AMD IOAPIC REGISTERS (READ-WRITE MATRIX)
+; ------------------------------------------------------------------------------
+; EXPLANATION: Ports inside the FCH used to write data directly into the I/O 
+; Advanced Programmable Interrupt Controller (IOAPIC). Written to intercept,
+; mask, or redirect physical motherboard hardware interrupt vectors.
+; ==============================================================================
+
+%define AMD_IOAPIC_INDEX_PORT           0x0FEC0000 
+; [READ/WRITE] Memory-Mapped I/O (MMIO) register index gate. Used to select 
+; which internal interrupt redirection table (RTE) entry you want to modify.
+
+%define AMD_IOAPIC_DATA_PORT            0x0FEC0010 
+; [READ/WRITE] MMIO Data register gateway. Writing here alters the properties 
+; (Vector number, Delivery mode, Mask bit) of the selected interrupt vector.
+
+; ==============================================================================
+; 🧠 PROCESSOR CORE MATRIX: AMD MASTER SYSTEM CONTROL REGISTERS (READ-WRITE MSRs)
+; ------------------------------------------------------------------------------
+; EXPLANATION: Model Specific Registers (MSRs) inside the CPU cores that are 
+; active for Read/Write. Altering these targets controls core execution shapes, 
+; page table protections, and the absolute activation of the Virtualization engine.
+; ==============================================================================
+
+
+; --- SUBSYSTEM CODENAME: AMD EXTENDED FEATURE ENABLE REGISTER (EFER) ---
+; EXPLANATION: The core control register enabling long mode and virtualization.
+; ------------------------------------------------------------------------------
+%define AMD_MSR_EFER                    0xC0000080 
+; [READ/WRITE] Injects core execution rules. 
+;   • Bit 8  (LME): Enables Long Mode (64-bit translation).
+;   • Bit 12 (SVME): Secure Virtual Machine Enable. Must be written with 1 
+;     to physically unlock the 'VMRUN' opcode and allow the VMCB cage to activate.
+
+
+; --- SUBSYSTEM CODENAME: AMD SYSENTER CONFIGURATION MATRICES ---
+; EXPLANATION: Registers controlling fast system calls from Ring 3 to Ring 0.
+; ------------------------------------------------------------------------------
+%define AMD_MSR_SYSENTER_CS             0x00000174 ; [READ/WRITE] Code Segment selector for fast privilege transitions
+%define AMD_MSR_SYSENTER_ESP            0x00000175 ; [READ/WRITE] Stack Pointer hook used during execution jumps
+%define AMD_MSR_SYSENTER_EIP            0x00000176 ; [READ/WRITE] Target Entry Point vector where the syscall begins execution
+
+
+; --- SUBSYSTEM CODENAME: AMD MEMORY TYPE RANGE REGISTERS (MTRR MASTER) ---
+; EXPLANATION: Registers defining how cacheability (WB/UC) is applied to physical RAM.
+; ------------------------------------------------------------------------------
+%define AMD_MSR_MTRR_DEF_TYPE           0x000002FF 
+; [READ/WRITE] Default Memory Type register. Written to globally enable/disable 
+; MTRRs and enforce cache boundaries over the hardware layout.
+
+
+; ==============================================================================
+; 🧠 ACTIVE DRAM: AMD UMC MEMORY MAP CONTROLLERS (MMIO READ-WRITE)
+; ------------------------------------------------------------------------------
+; EXPLANATION: Hidden memory-mapped I/O apertures handling active write access
+; directly into the Unified Memory Controllers (UMCs). Writing here modifies the
+; physical mapping configurations of DDR5 memory blocks.
+; ==============================================================================
+
+%define AMD_UMC_MMIO_BASE_ADDR          0xFEE00000 
+; [READ/WRITE] Fused MMIO anchor point tracking the base configuration layout 
+; of the memory channel registers inside the internal fabric layout.
+
+%define AMD_REG_UMC_SCRUB_CTRL_WRITE    0x000001CC 
+; [READ/WRITE] Injects structural changes into the background memory scavenger.
+; Written to dynamic-scale the scrubbing cadence or manually force an error scan.
+
+%define AMD_REG_UMC_INTERLEAVE_ENF     0x000001D0 
+; [READ/WRITE] Enforces active memory interleaving. Writing to this offset alters
+; how rows and banks of physical DRAM pages are grouped together under the hood.
+
+
+; ==============================================================================
+; 🔒 ACTIVE CORE: AMD HARDWARE CONFIGURATION MSR (READ-WRITE MSR)
+; ------------------------------------------------------------------------------
+; EXPLANATION: The master Hardware Configuration Register (HWCR) inside AMD cores.
+; Executing 'wrmsr' here alters foundational execution laws and locks/unlocks
+; system configuration protections across the computing complexes.
+; ==============================================================================
+
+%define AMD_MSR_HWCR                    0xC0010015 
+; [READ/WRITE] The architectural hardware override control center.
+
+%define AMD_HWCR_SMM_LOCK_BIT           0x00000010 
+; [STICKY BIT] Bit 4 (SMM_LOCK). When written to 1, it permanently disables 
+; modification of the SMM memory ranges, effectively shielding the SMRAM vault.
+
+%define AMD_HWCR_TLB_FLUSH_ON_VMRUN     0x00040000 
+; [READ/WRITE] Bit 18. Written to force an absolute hardware-level flush of the 
+; Translation Lookaside Buffer every time a guest is launched, crushing side-channels.
+
+
+; ==============================================================================
+; 🛡️ FORTRESS BLOCK: AMD SYSTEM-WIDE HARDWARE SECURITY LOCKS (READ-WRITE)
+; ------------------------------------------------------------------------------
+; EXPLANATION: High-privilege execution overrides and registers inside the core.
+; Writing to these specific targets locks the remaining hidden side-channels,
+; freezes the system clock telemetry against evasion, and hard-fences the BIOS.
+; ==============================================================================
+
+; --- SUBSYSTEM CODENAME: AMD BIOS ROM EXTENDED PROTECT WINDOW (SPI DIRECT BAR) ---
+; EXPLANATION: Alternate Direct Memory Access gate for the SPI flash engine.
+; ------------------------------------------------------------------------------
+%define AMD_SPI_MEM_COMPLY_BAR          0xFEC10000 
+; [READ/WRITE] Direct MMIO mapping window for the SPI Controller. Written to force 
+; strict base-address constraints over the firmware memory footprint.
+
+
+; ==============================================================================
+; 🚌 CHIPSET MATRIX: AMD FCH PHYSICAL CONTROLLER REGISTERS (MMIO READ-WRITE)
+; ------------------------------------------------------------------------------
+; EXPLANATION: Hidden registers located physically on the motherboard chipset (FCH).
+; Written via direct memory memory mapping (MMIO) to control power management state 
+; machines, legacy SMBus routing, and hardware peripheral mapping lanes.
+; ==============================================================================
+
+
+; --- SUBSYSTEM CODENAME: AMD FCH PMIO ACPI I/O BASE WINDOW ---
+; EXPLANATION: Configures where the power management and ACPI I/O registers exist.
+; Written to dynamic-shift or lock down the system power state controls.
+; ------------------------------------------------------------------------------
+%define AMD_FCH_PMIO_BASE_REG           0x8000F860 ; Combined with port 0x0CF8 (LPC Bridge Offset 0x60)
+; [READ/WRITE] Injects the 32-bit physical base address where the power management 
+; register matrix (PMIO BAR) is mapped in the system.
+
+
+; --- SUBSYSTEM CODENAME: AMD FCH SYSTEM MANAGEMENT MESSAGE IND_EX ---
+; EXPLANATION: The physical MMIO address window inside the Southbridge used to inject 
+; indexing bytes directly into the chipsets internal configuration state machine.
+; ------------------------------------------------------------------------------
+%define AMD_FCH_MMIO_PM_INDEX           0xFED80300 
+; [READ/WRITE] Power Management Index port (MMIO). Writing a byte here selects 
+; a private sub-register inside the chipsets physical power/reset controller.
+
+
+; --- SUBSYSTEM CODENAME: AMD FCH SYSTEM MANAGEMENT MESSAGE DATA ---
+; EXPLANATION: The physical MMIO data window used to alter the configuration 
+; targeted by the previous Index register.
+; ------------------------------------------------------------------------------
+%define AMD_FCH_MMIO_PM_DATA            0xFED80301 
+; [READ/WRITE] Power Management Data port (MMIO). Pumps the configuration byte 
+; directly to the selected internal chipset register (e.g., forcing a Sleep/Wake override).
+
+
+; --- SUBSYSTEM CODENAME: AMD FCH ACPI CONTROLLER GLOBAL COMMAND ---
+; EXPLANATION: Written to configure the behavior of ACPI event triggers and timers.
+; ------------------------------------------------------------------------------
+%define AMD_FCH_ACPI_CMD_OFFSET         0xFED80304 
+; [READ/WRITE] Global ACPI Command register. Written to enable or disable legacy 
+; SMI (System Management Interrupt) triggers originating from motherboard buttons or events.
+
+; ==============================================================================
+; 🗺️ EXPANDED CHIPSET MATRIX: AMD FCH GPIO & HPET CONTROLLERS (MMIO READ-WRITE)
+; ------------------------------------------------------------------------------
+; EXPLANATION: Targets the explicit physical hardware pins and precision timers 
+; located on the motherboard silicon. Writing here enables strict routing 
+; filters over interrupt pin assignments and freezes time telemetry.
+; ==============================================================================
+
+
+; --- SUBSYSTEM CODENAME: AMD FCH GPIO CONTROL REGISTER BASE ---
+; EXPLANATION: The base address where the chipset maps the pin configuration 
+; registers (GPIO BAR) in physical memory.
+; ------------------------------------------------------------------------------
+%define AMD_FCH_GPIO_BASE_ADDR          0xFED81500 
+; [READ/WRITE] Injects structural pin multiplexing rules. Each offset within 
+; this BAR controls a physical copper trace on the motherboard layer.
+
+
+; --- SUBSYSTEM CODENAME: AMD FCH HIGH PRECISION EVENT TIMER (HPET BASE) ---
+; EXPLANATION: Master hardware clock inside the Southbridge. Written to initialize 
+; or modify the main scheduling frequencies of the physical platform.
+; ------------------------------------------------------------------------------
+%define AMD_FCH_HPET_BASE_ADDR          0xFED00000 
+; [READ/WRITE] Memory-Mapped I/O anchor point for the system-wide HPET clock matrix.
+
+
+; --- SUBSYSTEM CODENAME: AMD FCH HPET CONFIGURATION OVERRIDE ---
+; EXPLANATION: Configures whether the HPET timer interrupts are active and routed.
+; ------------------------------------------------------------------------------
+%define AMD_REG_HPET_CFG_WRITE          0x00000010 
+; [READ/WRITE] Combined with AMD_FCH_HPET_BASE_ADDR. Writing here enables the timer 
+; or forces a structural lock bit that pins the synchronization lines.
+
+; ==============================================================================
+; ⚡ SMU SHADOW MATRIX: AMD SYSTEM MANAGEMENT UNIT (MMIO READ-WRITE)
+; ------------------------------------------------------------------------------
+; EXPLANATION: Shadow MMIO ranges utilized by high-level firmware to force 
+; direct clock scaling and frequency step transitions across the fabric.
+; ==============================================================================
+
+%define AMD_SMU_MMIO_SHADOW_BASE        0xFED80000 
+; [READ/WRITE] The primary physical configuration base for private SMU register shadows.
+
+%define AMD_REG_SMU_CLK_OVERRIDE_RW     0x0000A100 
+; [READ/WRITE] Written to force real-time manual adjustments over the internal 
+; processor core clock mesh, altering telemetry timestamps.
+
+; ==============================================================================
+; 🛑 FIREWALL MATRIX: AMD-Vi IOMMU EXECUTION GATEWAYS (MMIO READ-WRITE)
+; ------------------------------------------------------------------------------
+; EXPLANATION: Mapped inside the primary IOMMU MMIO window. Written to engage 
+; active page translation caches and force strict isolation over peripheral device buses.
+; ==============================================================================
+
+%define AMD_IOMMU_MMIO_ACTIVE_BASE      0xF4000000 
+; [READ/WRITE] Fused structural location in RAM where the IOMMU translation 
+; control registers are physically anchored at boot.
+
+%define AMD_REG_IOMMU_CONTROL_MASK      0x00000018 
+; [READ/WRITE] Global Control Register. Writing here enables the entire IOMMU 
+; hardware firewall, forces address translation, and engages device domain locks.
