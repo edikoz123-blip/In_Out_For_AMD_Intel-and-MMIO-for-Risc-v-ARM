@@ -131,3 +131,17 @@ CSR_CUSTOM_S_ZONE0   equ 0x5C0   ; Custom Supervisor Configuration Register Base
 CSR_CUSTOM_M_ZONE0   equ 0x7C0   ; Custom Machine-Mode Hardware Core Controller 0
 CSR_CUSTOM_M_ZONE1   equ 0x7C1   ; Custom Machine-Mode Hardware Execution Delay / Lock
 CSR_CUSTOM_M_SECURE  equ 0x7FF   ; Manufacturer Deep Firmware Cryptographic Gateway
+
+; ==============================================================================
+; 9. CHERI-RISC-V ARCHITECTURAL CAPABILITY CSRS (HARDWARE CAPABILITY PROTECTION)
+; ------------------------------------------------------------------------------
+; Silicon-enforced structural limits to prevent any illegal memory bounds access
+CSR_MSTATUS_CAP      equ 0x310   ; Machine Status Capability Register (Enforces hardware Tag enforcement)
+CSR_MEXEC_CAP        equ 0x311   ; Machine Execution Capability Register (Root capability for code execution)
+CSR_MDATA_CAP        equ 0x312   ; Machine Data Capability Register (Restricts memory read/write boundaries)
+CSR_MTCC             equ 0x315   ; Machine Trap Vector Capability Register (Hardware entry point for exceptions)
+
+; Supervisor-Level Capability Isolation Layers
+CSR_STCC             equ 0x115   ; Supervisor Trap Vector Capability Register (Isolates Kernel exceptions)
+CSR_SEPC_CAP         equ 0x141   ; Supervisor Exception Program Counter Capability (Holds sealed return pointer)
+
