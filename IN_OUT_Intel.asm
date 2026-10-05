@@ -89,6 +89,12 @@ PORT_PCH_ELCR3       equ 0x04D2  ; PCH Master IRQ Edge/Level Control Extension (
 PORT_PCH_ELCR4       equ 0x04D3  ; PCH Slave IRQ Edge/Level Control Extension (R/W)
 PORT_LPC_SERIRQ_EX   equ 0x04D4  ; PCH Serial IRQ Edge/Level Configuration Port (R/W)
 
+; ==============================================================================
+; 3. INTERRUPT CONTROLLERS (NMI & APIC ADVANCED VECTOR CORE)
+; ==============================================================================
+PORT_NMI_ENABLE_MASK equ 0x0070  ; CMOS Address Register and NMI Hardware Mask Bit (W)
+PORT_APIC_LVT_ALIAS  equ 0x0024  ; Extended Advanced PIC Local Vector Table Alias (R/W)
+
 
 ; ==============================================================================
 ; 4. TIMERS, TIME-KEEPING, & CMOS RECOVERY
@@ -173,6 +179,14 @@ PORT_DMA2_RESET_ALL  equ 0x00DA  ; DMA Controller 2 Master Clear/Reset Execution
 
 PORT_DMA1_WRITE_REG  equ 0x0008  ; Master DMA Controller 1 Command/Write Base Port (W)
 PORT_DMA2_WRITE_REG  equ 0x00D0  ; Slave DMA Controller 2 Command/Write Base Port (W)
+
+
+; ==============================================================================
+; 5. SYSTEM DMA CONTROLLERS & PAGE REGISTERS (BYTE POINTER FLIP-FLOPS)
+; ==============================================================================
+PORT_DMA1_CLR_FF     equ 0x000C  ; DMA Controller 1 Clear Byte Pointer Flip-Flop (W)
+PORT_DMA2_CLR_FF     equ 0x00D8  ; DMA Controller 2 Clear Byte Pointer Flip-Flop (W)
+
 
 ; ==============================================================================
 ; 6. MOTHERBOARD GRAPHICS (VGA) & DEBUG CODES
@@ -260,3 +274,19 @@ SPI_BASE_ADDRESS     equ 0xFE010100  ; PCH SPI Flash Controller MMIO Base (BIOS 
 HPET_MMIO_BASE       equ 0xFED00000  ; High Precision Event Timer Hardware Memory Window (R/W)
 
 PORT_PROC_INTF_CTRL  equ 0x00F0  ; Processor Coprocessor Interface Control Window (R/W)
+
+; ==============================================================================
+; 9. INTEL MODEL-SPECIFIC REGISTERS (UNDOCUMENTED HARDWARE VOLTAGE & MICROCODE)
+; ==============================================================================
+MSR_IA32_PLATFORM_ID       equ 0x00000017 ; Platform ID and Hardware Fuse Configuration (R)
+MSR_IA32_BIOS_UPDT_TRIG    equ 0x00000079 ; Microcode Update Trigger and Verification Gateway (W)
+MSR_IA32_ARCH_CAPABILITIES equ 0x0000010A ; Hardware Vulnerability and Mitigation Reporting (R)
+
+MSR_IA32_PERF_STATUS       equ 0x00000198 ; Current Hardware Voltage and Frequency Status (R)
+MSR_IA32_PERF_CTL          equ 0x00000199 ; Target Hardware P-State and Core Voltage Control (R/W)
+
+
+; that is link for volume 4 for Intel that I used to find the undocumented MSRS: .https://www.intel.com/content/dam/develop/external/us/en/documents/335592-sdm-vol-4.pdf 
+; do without . on google and if you see H it is mean 0x for example H48 = 0x48 
+; and what we did up is for the MotherBoard so you will not 'blackboxs' so you can defend properly
+; because I learn defenses are most of the time losing because they forget MSRS so I did it so we can protect way better
