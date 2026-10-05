@@ -290,3 +290,4 @@ MSR_IA32_PERF_CTL          equ 0x00000199 ; Target Hardware P-State and Core Vol
 ; do without . on google and if you see H it is mean 0x for example H48 = 0x48 
 ; and what we did up is for the MotherBoard so you will not 'blackboxs' so you can defend properly
 ; because I learn defenses are most of the time losing because they forget MSRS so I did it so we can protect way better
+; and if you need I already did most of the Intel MSRS on my Defines you can check it out!
